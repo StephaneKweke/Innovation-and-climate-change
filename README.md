@@ -1,8 +1,8 @@
 # Innovation-and-climate-change-in-US-Agriculture
 ## The project analyzes the link between crop innovation and climate change damages mitigation in US  agriculture.
 
-This project is an extension based on the original paper of [Moscona and Sastry, Quartely Journal of 
-Economics, 2023 entitled "DOES DIRECTED INNOVATION MITIGATE CLIMATE DAMAGE? EVIDENCE FROM U.S. AGRICULTURE"][(https://example.com](https://academic.oup.com/qje/article/138/2/637/6760169?guestAccessKey=))
+This project is an extension based on the original paper of Moscona and Sastry, Quartely Journal of 
+Economics, 2023 entitled "DOES DIRECTED INNOVATION MITIGATE CLIMATE DAMAGE? EVIDENCE FROM U.S. AGRICULTURE" [here](https://academic.oup.com/qje/article/138/2/637/6760169?guestAccessKey=)
 
 ## Research questions :
 #### 1 - Effect of heat exposure on crop yields
