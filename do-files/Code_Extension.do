@@ -28,6 +28,7 @@ clear all
 global root "C:\Users\steph\Documents\ENSAE\3A\Environmental Econ\Innovation-and-climate-change"
 cd "${root}"
 
+/*
 *importing panel data
 use "../data/us_panel_short_burkeemmerick.dta", clear
 
@@ -263,3 +264,110 @@ esttab col1 col2 col3 col4 using "outputs/tables/Table2_decade_average.tex", rep
              "* p<0.10, ** p<0.05, *** p<0.01.")
 
 restore 
+
+*/
+
+***************************** Question 3 : Marginal effects of innovation on land values ******************
+
+
+use "../data/county_level_data.dta", clear
+summ lland_value_acre ee loo ee_innov
+
+// keep the same structure as the author to ensure comparability
+
+preserve
+
+keep if year==1950 | year ==2010
+
+reghdfe lland_value_acre ee loo ee_innov , ///
+    absorb(id year#state) ///
+    vce(cluster id state_year)
+	
+* computing quantiles values of exposure
+
+quietly summarize ee, detail
+
+local q10 = r(p10)
+local q25 = r(p25)
+local q50 = r(p50)
+local q75 = r(p75)
+local q90 = r(p90)
+
+display "p10 ee = `q10'"
+display "p25 ee = `q25'"
+display "p50 ee = `q50'"
+display "p75 ee = `q75'"
+display "p90 ee = `q90'"
+
+
+gen quantile = _n
+replace quantile = . if quantile>100
+
+gen beta_quant = .
+gen se_quant   = .
+
+* computing marginal effects
+
+lincom loo + `q10'*ee_innov
+replace beta_quant = r(estimate) if quantile==10
+replace se_quant   = r(se)       if quantile==10
+
+lincom loo + `q25'*ee_innov
+replace beta_quant = r(estimate) if quantile==25
+replace se_quant   = r(se)       if quantile==25
+
+lincom loo + `q50'*ee_innov
+replace beta_quant = r(estimate) if quantile==50
+replace se_quant   = r(se)       if quantile==50
+
+lincom loo + `q75'*ee_innov
+replace beta_quant = r(estimate) if quantile==75
+replace se_quant   = r(se)       if quantile==75
+
+lincom loo + `q90'*ee_innov
+replace beta_quant = r(estimate) if quantile==90
+replace se_quant   = r(se)       if quantile==90
+
+
+* confidence intervals
+
+gen ci_up     = beta_quant + 1.96*se_quant
+gen ci_down   = beta_quant - 1.96*se_quant
+gen ci_up_90  = beta_quant + 1.645*se_quant
+gen ci_down_90= beta_quant - 1.645*se_quant
+
+* Graphs
+
+twoway ///
+    (rcap ci_up ci_down quantile, lcolor(gs10) lpattern(shortdash)) ///
+    (rcap ci_up_90 ci_down_90 quantile, lcolor(gs6)) ///
+    (scatter beta_quant quantile, mcolor(black) msize(medium) mlwidth(medthick)) ///
+    , ///
+    xtitle("Extreme heat exposure quantile") ///
+    ytitle("Marginal effect of innovation exposure") ///
+    legend(off) ///
+    yline(0, lcolor(black)) ///
+    xlabel(0 10 25 50 75 90 100)
+
+graph export "outputs/figures/Figure_RQ3_marginal_effect_innovation_by_heat_quantiles.png", replace
+
+restore
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
