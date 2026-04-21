@@ -28,7 +28,7 @@ clear all
 global root "C:\Users\steph\Documents\ENSAE\3A\Environmental Econ\Innovation-and-climate-change"
 cd "${root}"
 
-/*
+
 *importing panel data
 use "../data/us_panel_short_burkeemmerick.dta", clear
 
@@ -265,7 +265,6 @@ esttab col1 col2 col3 col4 using "outputs/tables/Table2_decade_average.tex", rep
 
 restore 
 
-*/
 
 ***************************** Question 3 : Marginal effects of innovation on land values ******************
 
