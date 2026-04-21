@@ -1,0 +1,22 @@
+\begin{table}[htbp]\centering
+\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
+\caption{End-of-decade Yields and Extreme Heat Exposure}
+\begin{tabular}{l*{4}{c}}
+\toprule
+                    &\multicolumn{1}{c}{(1)}&\multicolumn{1}{c}{(2)}&\multicolumn{1}{c}{(3)}&\multicolumn{1}{c}{(4)}\\
+                    &\multicolumn{1}{c}{Corn}&\multicolumn{1}{c}{Soy}&\multicolumn{1}{c}{Cotton}&\multicolumn{1}{c}{Pooled}\\
+\midrule
+Extreme heat exposure/1000&      -0.271\sym{***}&      -0.124         &      -2.567\sym{***}&      -0.185\sym{***}\\
+                    &     (0.087)         &     (0.105)         &     (0.432)         &     (0.045)         \\
+\midrule
+County fixed effects&         Yes         &         Yes         &         Yes         &         Yes         \\
+Decade fixed effects&         Yes         &         Yes         &         Yes         &         Yes         \\
+Crop fixed effects  &          No         &          No         &          No         &         Yes         \\
+Observations        &      11,998         &       8,942         &       2,813         &      24,145         \\
+^2$                 &       0.824         &       0.708         &       0.695         &       0.924         \\
+\bottomrule
+\multicolumn{5}{l}{\footnotesize Standard errors clustered at the county level in parentheses.}\\
+\multicolumn{5}{l}{\footnotesize ,}\\
+\multicolumn{5}{l}{\footnotesize * p<0.10, ** p<0.05, *** p<0.01.}\\
+\end{tabular}
+\end{table}
