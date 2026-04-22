@@ -1,0 +1,40 @@
+{
+\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
+\begin{tabular}{l*{1}{c}}
+\toprule
+                    &\multicolumn{1}{c}{(1)}\\
+                    &\multicolumn{1}{c}{Interaction model}\\
+                    &        b/se         \\
+\midrule
+Extreme heat exposure (Corn)&      -0.219\sym{***}\\
+                    &     (0.053)         \\
+Additional effect for Soy $\times$ exposure&       0.296\sym{***}\\
+                    &     (0.034)         \\
+Additional effect for Cotton $\times$ exposure&       0.017         \\
+                    &     (0.107)         \\
+\midrule
+Implied slope: Corn &      -0.219         \\
+Implied slope: Soy  &       0.077         \\
+Implied slope: Cotton&      -0.202         \\
+p-value: equal slopes (joint test)&       0.000         \\
+p-value: Soy = Corn &       0.000         \\
+p-value: Cotton = Corn&       0.873         \\
+p-value: Soy = Cotton&       0.015         \\
+County $\times$ crop fixed effects&         Yes         \\
+Decade fixed effects&         Yes         \\
+Observations        &      31,683         \\
+^2$                 &       0.957         \\
+\bottomrule
+\multicolumn{2}{l}{\footnotesize Dependent variable: log yield.}\\
+\multicolumn{2}{l}{\footnotesize ,}\\
+\multicolumn{2}{l}{\footnotesize Base category is Corn.}\\
+\multicolumn{2}{l}{\footnotesize ,}\\
+\multicolumn{2}{l}{\footnotesize The coefficient on extreme heat exposure reports the slope for Corn.}\\
+\multicolumn{2}{l}{\footnotesize ,}\\
+\multicolumn{2}{l}{\footnotesize The interaction coefficients report how the Soy and Cotton slopes differ from the Corn slope.}\\
+\multicolumn{2}{l}{\footnotesize ,}\\
+\multicolumn{2}{l}{\footnotesize Standard errors clustered at the county level in parentheses.}\\
+\multicolumn{2}{l}{\footnotesize ,}\\
+\multicolumn{2}{l}{\footnotesize * p$<$0.10, ** p$<$0.05, *** p$<$0.01.}\\
+\end{tabular}
+}

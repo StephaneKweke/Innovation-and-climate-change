@@ -126,6 +126,7 @@ label var crop_type "Crop"
 
 replace exposure = exposure/1000
 
+
 preserve
 
 ************************************************************
@@ -265,6 +266,91 @@ esttab col1 col2 col3 col4 using "outputs/tables/Table2_decade_average.tex", rep
 
 restore 
 
+************************************************************
+* TABLE 3: HETEROGENEITY
+************************************************************
+
+
+preserve
+
+collapse (mean) yield exposure, by(fips cnty_fips decade crop_id)
+
+gen lnyield = log(yield) if yield>0
+
+reghdfe lnyield c.exposure##i.crop_id if !missing(lnyield, exposure), ///
+    absorb(fips decade) vce(cluster fips)
+
+eststo hetero_eod
+
+* 2. Add FE indicators
+estadd local countycrop_fe "Yes"
+estadd local decade_fe     "Yes"
+
+* 3. Joint test of equal slopes across crops
+testparm 2.crop_id#c.exposure 3.crop_id#c.exposure
+estadd scalar p_joint = r(p)
+
+* 4. Pairwise tests
+test 2.crop_id#c.exposure = 0
+estadd scalar p_soy_vs_corn = r(p)
+
+test 3.crop_id#c.exposure = 0
+estadd scalar p_cotton_vs_corn = r(p)
+
+test 2.crop_id#c.exposure = 3.crop_id#c.exposure
+estadd scalar p_soy_vs_cotton = r(p)
+
+* 5. Implied slopes by crop
+lincom c.exposure
+estadd scalar slope_corn = r(estimate)
+
+lincom c.exposure + 2.crop_id#c.exposure
+estadd scalar slope_soy = r(estimate)
+
+lincom c.exposure + 3.crop_id#c.exposure
+estadd scalar slope_cotton = r(estimate)
+
+* 6. Export LaTeX table
+esttab hetero_eod using "outputs/tables/Table_heterogeneity_end_of_decade.tex", replace ///
+    booktabs label ///
+    cells(b(star fmt(3)) se(par fmt(3))) ///
+    mtitle("Interaction model") ///
+    keep(exposure 2.crop_id#exposure 3.crop_id#exposure) ///
+    order(exposure 2.crop_id#exposure 3.crop_id#exposure) ///
+    coeflabels( ///
+        exposure              "Extreme heat exposure (Corn)" ///
+        2.crop_id#c.exposure    "Additional effect for Soy $\times$ exposure" ///
+        3.crop_id#c.exposure    "Additional effect for Cotton $\times$ exposure" ///
+    ) ///
+    stats(slope_corn slope_soy slope_cotton ///
+          p_joint p_soy_vs_corn p_cotton_vs_corn p_soy_vs_cotton ///
+          countycrop_fe decade_fe N r2, ///
+          labels( ///
+            "Implied slope: Corn" ///
+            "Implied slope: Soy" ///
+            "Implied slope: Cotton" ///
+            "p-value: equal slopes (joint test)" ///
+            "p-value: Soy = Corn" ///
+            "p-value: Cotton = Corn" ///
+            "p-value: Soy = Cotton" ///
+            "County $\times$ crop fixed effects" ///
+            "Decade fixed effects" ///
+            "Observations" ///
+            "$R^2$" ///
+          ) ///
+          fmt(3 3 3 3 3 3 3 0 0 %9.0fc 3)) ///
+    nonotes ///
+    addnotes( ///
+        "Dependent variable: log yield.", ///
+        "Base category is Corn.", ///
+        "The coefficient on extreme heat exposure reports the slope for Corn.", ///
+        "The interaction coefficients report how the Soy and Cotton slopes differ from the Corn slope.", ///
+        "Standard errors clustered at the county level in parentheses.", ///
+        "* p$<$0.10, ** p$<$0.05, *** p$<$0.01." ///
+    )
+
+restore
+
 
 ***************************** Question 3 : Marginal effects of innovation on land values ******************
 
@@ -278,7 +364,7 @@ preserve
 
 keep if year==1950 | year ==2010
 
-reghdfe lland_value_acre ee loo ee_innov , ///
+reghdfe lland_value_acre ee loo ee_innov, ///
     absorb(id year#state) ///
     vce(cluster id state_year)
 	
@@ -351,8 +437,6 @@ twoway ///
 graph export "outputs/figures/Figure_RQ3_marginal_effect_innovation_by_heat_quantiles.png", replace
 
 restore
-
-
 
 
 
