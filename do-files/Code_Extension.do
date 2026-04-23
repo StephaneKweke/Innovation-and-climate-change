@@ -29,6 +29,7 @@ global root "C:\Users\steph\Documents\ENSAE\3A\Environmental Econ\Innovation-and
 cd "${root}"
 
 
+
 *importing panel data
 use "../data/us_panel_short_burkeemmerick.dta", clear
 
@@ -350,6 +351,196 @@ esttab hetero_eod using "outputs/tables/Table_heterogeneity_end_of_decade.tex", 
     )
 
 restore
+
+
+***************************** Question 2 : Heat exposure and introduction of new varieties ******************
+
+use "../data/crop_level_data.dta", clear
+
+* Keep only the years needed to build the 1970–2000 long difference
+keep if inlist(year, 1970, 2000)
+
+* We only need the variables relevant for the new long-difference exercise
+keep id crop_censusname year ///
+     ncrop hot_gdd_panel ///
+     log_total_area pre_precip pre_avgtemp ///
+     max_temp max_temp_2
+
+
+reshape wide ncrop hot_gdd_panel, i(id crop_censusname log_total_area pre_precip pre_avgtemp max_temp max_temp_2) j(year)
+
+* constructing variables of interest
+
+// number of new varieties developed during the period 1970–2000
+gen ld_variety_70 = ncrop2000 - ncrop1970
+label var ld_variety_70 "New varieties, 1970--2000"
+
+//change in crop-level extreme heat exposure between 1970 and 2000
+gen ld_hot_gdd_70 = (hot_gdd_panel2000 - hot_gdd_panel1970)/10
+label var ld_hot_gdd_70 "Change in extreme exposure, 1970--2000"
+
+//Baseline innovation control, specific to our period
+gen asinh_ncrop_1970 = asinh(ncrop1970)
+label var asinh_ncrop_1970 "asinh(initial varieties, 1970)"
+
+//Keep estimation sample
+drop if missing(ld_variety_70, ld_hot_gdd_70)
+
+//Quick checks
+summ ld_variety_70 ld_hot_gdd_70 asinh_ncrop_1970
+count
+
+*==========================================================*
+* TABLE 1: Poisson specifications
+*==========================================================*
+eststo clear
+
+* (1) Market size only
+poisson ld_variety_70 ld_hot_gdd_70 log_total_area, vce(robust)
+eststo p1
+estadd local preclim "No"
+estadd local initinnov "No"
+estadd local threshold "No"
+
+* (2) + pre-period climate
+poisson ld_variety_70 ld_hot_gdd_70 log_total_area pre_precip pre_avgtemp, vce(robust)
+eststo p2
+estadd local preclim "Yes"
+estadd local initinnov "No"
+estadd local threshold "No"
+
+* (3) + initial innovation in 1970
+poisson ld_variety_70 ld_hot_gdd_70 log_total_area pre_precip pre_avgtemp asinh_ncrop_1970, vce(robust)
+eststo p3
+estadd local preclim "Yes"
+estadd local initinnov "Yes"
+estadd local threshold "No"
+
+* (4) + crop heat-threshold controls
+poisson ld_variety_70 ld_hot_gdd_70 log_total_area pre_precip pre_avgtemp ///
+       asinh_ncrop_1970 max_temp max_temp_2, vce(robust)
+eststo p4
+estadd local preclim "Yes"
+estadd local initinnov "Yes"
+estadd local threshold "Yes"
+
+* exporting in rtf
+
+esttab p1 p2 p3 p4 using "outputs\tables\Table_RQ2_Poisson_1970_2000.rtf", replace ///
+    se star(* 0.10 ** 0.05 *** 0.01) ///
+    b(%9.3f) se(%9.3f) ///
+	mtitles("(1)" "(2)" "(3)" "(4)") ///
+	nonumbers  ///
+    title("Table RQ2. Heat Exposure and New Varieties, 1970--2000 (Poisson)") ///
+    keep(ld_hot_gdd_70) ///
+    order(ld_hot_gdd_70) ///
+    coeflabels(ld_hot_gdd_70 "Change in extreme exposure") ///
+    stats(preclim initinnov threshold N, ///
+          labels("Pre-period climate controls" "Initial innovation control" "Heat-threshold controls" "Observations") ///
+          fmt(0 0 0 %9.0fc)) ///
+    addnotes("Dependent variable: number of new varieties developed between 1970 and 2000.", ///
+             "Robust standard errors in parentheses.", ///
+             "* p<0.10, ** p<0.05, *** p<0.01.")
+
+* exporting in Latex 
+
+esttab p1 p2 p3 p4 using "outputs\tables\Table_RQ2_Poisson_1970_2000.tex", replace ///
+    booktabs label ///
+    se star(* 0.10 ** 0.05 *** 0.01) ///
+    b(%9.3f) se(%9.3f) ///
+    mtitles("(1)" "(2)" "(3)" "(4)") ///
+	nonumbers  ///
+    title("Heat Exposure and New Varieties, 1970--2000 (Poisson)") ///
+    keep(ld_hot_gdd_70) ///
+    order(ld_hot_gdd_70) ///
+    coeflabels(ld_hot_gdd_70 "Change in extreme exposure") ///
+    stats(preclim initinnov threshold N, ///
+          labels("Pre-period climate controls" "Initial innovation control" "Heat-threshold controls" "Observations") ///
+          fmt(0 0 0 %9.0fc)) ///
+    nonotes ///
+    addnotes("Dependent variable: number of new varieties developed between 1970 and 2000.", ///
+             "Robust standard errors in parentheses.", ///
+             "* p$<$0.10, ** p$<$0.05, *** p$<$0.01.")
+
+			 
+*==========================================================*
+* TABLE 2: Linear specifications (OLS)
+*==========================================================*
+eststo clear
+
+* (1) Market size only
+reg ld_variety_70 ld_hot_gdd_70 log_total_area, vce(robust)
+eststo o1
+estadd local preclim "No"
+estadd local initinnov "No"
+estadd local threshold "No"
+
+* (2) + pre-period climate
+reg ld_variety_70 ld_hot_gdd_70 log_total_area pre_precip pre_avgtemp, vce(robust)
+eststo o2
+estadd local preclim "Yes"
+estadd local initinnov "No"
+estadd local threshold "No"
+
+* (3) + initial innovation in 1970
+reg ld_variety_70 ld_hot_gdd_70 log_total_area pre_precip pre_avgtemp asinh_ncrop_1970, vce(robust)
+eststo o3
+estadd local preclim "Yes"
+estadd local initinnov "Yes"
+estadd local threshold "No"
+
+* (4) + crop heat-threshold controls
+reg ld_variety_70 ld_hot_gdd_70 log_total_area pre_precip pre_avgtemp ///
+    asinh_ncrop_1970 max_temp max_temp_2, vce(robust)
+eststo o4
+estadd local preclim "Yes"
+estadd local initinnov "Yes"
+estadd local threshold "Yes"
+
+
+* exporting in rtf
+
+esttab o1 o2 o3 o4 using "outputs\tables\Table_RQ2_OLS_1970_2000.rtf", replace ///
+    se star(* 0.10 ** 0.05 *** 0.01) ///
+    b(%9.3f) se(%9.3f) ///
+    mtitles("(1)" "(2)" "(3)" "(4)") ///
+	nonumbers ///
+    title("Table RQ2. Heat Exposure and New Varieties, 1970--2000 (OLS)") ///
+    keep(ld_hot_gdd_70) ///
+    order(ld_hot_gdd_70) ///
+    coeflabels(ld_hot_gdd_70 "Change in extreme exposure") ///
+    stats(preclim initinnov threshold N r2, ///
+          labels("Pre-period climate controls" "Initial innovation control" "Heat-threshold controls" "Observations" "$R^2$") ///
+          fmt(0 0 0 %9.0fc %9.3f)) ///
+    addnotes("Dependent variable: number of new varieties developed between 1970 and 2000.", ///
+             "Robust standard errors in parentheses.", ///
+             "* p<0.10, ** p<0.05, *** p<0.01.")
+
+* exporting in Latex
+
+esttab o1 o2 o3 o4 using "outputs\tables\Table_RQ2_OLS_1970_2000.tex", replace ///
+    booktabs label ///
+    se star(* 0.10 ** 0.05 *** 0.01) ///
+    b(%9.3f) se(%9.3f) ///
+    mtitles("(1)" "(2)" "(3)" "(4)") ///
+	nonumbers ///
+    title("Heat Exposure and New Varieties, 1970--2000 (OLS)") ///
+    keep(ld_hot_gdd_70) ///
+    order(ld_hot_gdd_70) ///
+    coeflabels(ld_hot_gdd_70 "Change in extreme exposure") ///
+    stats(preclim initinnov threshold N r2, ///
+          labels("Pre-period climate controls" "Initial innovation control" "Heat-threshold controls" "Observations" "$R^2$") ///
+          fmt(0 0 0 %9.0fc %9.3f)) ///
+    nonotes ///
+    addnotes("Dependent variable: number of new varieties developed between 1970 and 2000.", ///
+             "Robust standard errors in parentheses.", ///
+             "* p$<$0.10, ** p$<$0.05, *** p$<$0.01.")
+
+display "RQ2 tables successfully created in outputs/tables/"
+
+
+
+
 
 
 ***************************** Question 3 : Marginal effects of innovation on land values ******************

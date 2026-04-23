@@ -1,0 +1,23 @@
+\begin{table}[htbp]\centering
+\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
+\caption{Heat Exposure and New Varieties, 1970--2000 (OLS)}
+\begin{tabular}{l*{4}{c}}
+\toprule
+                    &\multicolumn{1}{c}{(1)}&\multicolumn{1}{c}{(2)}&\multicolumn{1}{c}{(3)}&\multicolumn{1}{c}{(4)}\\
+\midrule
+Change in extreme exposure&       7.061\sym{***}&       9.302\sym{***}&       8.037\sym{***}&      11.052\sym{***}\\
+                    &     (2.007)         &     (2.269)         &     (2.033)         &     (3.368)         \\
+\midrule
+Pre-period climate controls&          No         &         Yes         &         Yes         &         Yes         \\
+Initial innovation control&          No         &          No         &         Yes         &         Yes         \\
+Heat-threshold controls&          No         &          No         &          No         &         Yes         \\
+Observations        &          69         &          69         &          69         &          69         \\
+^2$                 &       0.408         &       0.432         &       0.546         &       0.570         \\
+\bottomrule
+\multicolumn{5}{l}{\footnotesize Dependent variable: number of new varieties developed between 1970 and 2000.}\\
+\multicolumn{5}{l}{\footnotesize ,}\\
+\multicolumn{5}{l}{\footnotesize Robust standard errors in parentheses.}\\
+\multicolumn{5}{l}{\footnotesize ,}\\
+\multicolumn{5}{l}{\footnotesize * p$<$0.10, ** p$<$0.05, *** p$<$0.01.}\\
+\end{tabular}
+\end{table}
