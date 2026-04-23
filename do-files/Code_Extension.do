@@ -1,5 +1,5 @@
 /**************************************************************************
-* Author: KWEKE NGAHANE Stephane & Salma El AAZDOUDI
+* Author: KWEKE NGAHANE Stephane
 * Project: Innovation and Climate Change in U.S. Agriculture
 * STATA version: 14
 *
